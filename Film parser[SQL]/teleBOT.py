@@ -6,7 +6,7 @@ from telebot.types import Message, ReplyKeyboardMarkup
 
 print("Bot RandomFilm is working...")
 
-token = "2071046556:AAHfW3e-nFgvqmgEBsGHkgvrR6y24pDFPZc"
+token = "#####################################"
 bot = telebot.TeleBot(token)
 
 genre_list = ['Драмы', 'Биографические', 'Приключения', 'Военные', 'Криминал', 'Боевики', 'Фантастика', 'Детективы',

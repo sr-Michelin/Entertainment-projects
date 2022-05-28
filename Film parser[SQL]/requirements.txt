@@ -1,5 +1,0 @@
-db-sqlite3
-regex
-requests
-beautifulsoup4
-pyTelegramBotAPI

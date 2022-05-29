@@ -19,16 +19,15 @@ genre_list = config.genre_list
 def command_handler(message: Message):
     bot.send_sticker(message.chat.id, "CAACAgIAAxkBAAEDGXdhawtyhM_bHvBiqCkkefAiTiGDXwACzAADtIBKJP2ViLiQSME9IQQ")
     bot.send_message(message.chat.id, 'Привіт {0.first_name}) \nЯ <b>{1.first_name}</b> - '
-                                      'бот, який допоможе Вам обрати фільм на вечір.'
-                                      '\n\nСписок команд:'
-                                      '\n/random - вибирає випадкову картину за принципом рандому;'
-                                      '\n/get_new - оновлює базу даних;'
-                                      '\n/get_count - вказує на кількість фільмів за жанрами.'.
-                     format(message.from_user, bot.get_me()), parse_mode='html')
+                                      'бот, який допоможе Вам обрати фільм на вечір.'.format(message.from_user,
+                                                                                             bot.get_me()) +
+                     f'{config.commands}',
+                     parse_mode='html')
 
 
 @bot.message_handler(commands=['get_count'])
 def command_handler(message: Message):
+    print(f'{message.from_user.id}, {message.from_user.first_name}, {message.from_user.username}, get_count')
     bot.send_message(message.chat.id, f'Переглядаю кількість фільмів за жанрами...')
     with sqlite3.connect('rezka.db') as con:
         c, c_ = con.cursor(), con.cursor()
@@ -41,6 +40,7 @@ def command_handler(message: Message):
 
 @bot.message_handler(commands=['get_new'])
 def command_handler(message: Message):
+    print(f'{message.from_user.id}, {message.from_user.first_name}, {message.from_user.username}, get_new')
     bot.send_message(message.chat.id, f'Поповнення бази фільмів...')
     bot.send_message(message.chat.id, f'База поповнена: \n{sql(genre_="best", depth_=6)}')
 

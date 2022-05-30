@@ -1,5 +1,6 @@
 # http://t.me/MS_film_bot
 
+import datetime
 import random
 import sqlite3
 import telebot
@@ -7,16 +8,25 @@ from rezka_parser import sql
 from telebot.types import Message, ReplyKeyboardMarkup
 import config
 
-print("Bot MS_film is working...")
-
 token = config.token
 bot = telebot.TeleBot(token)
-
 genre_list = config.genre_list
+
+
+def _print(message, file="logs/logs.txt"):
+    print(f'{message}')
+    with open(file, "a+") as f:
+        f.write(f"{message}\n")
+
+
+_print("Bot MS_film is working...\n")
 
 
 @bot.message_handler(commands=['start'])
 def command_handler(message: Message):
+    _print(
+        f'{datetime.datetime.now()}: {message.from_user.id}, {message.from_user.first_name}, '
+        f'{message.from_user.username}, "start"')
     bot.send_sticker(message.chat.id, "CAACAgIAAxkBAAEDGXdhawtyhM_bHvBiqCkkefAiTiGDXwACzAADtIBKJP2ViLiQSME9IQQ")
     bot.send_message(message.chat.id, 'Привіт {0.first_name}) \nЯ <b>{1.first_name}</b> - '
                                       'бот, який допоможе Вам обрати фільм на вечір.'.format(message.from_user,
@@ -27,7 +37,9 @@ def command_handler(message: Message):
 
 @bot.message_handler(commands=['get_count'])
 def command_handler(message: Message):
-    print(f'{message.from_user.id}, {message.from_user.first_name}, {message.from_user.username}, get_count')
+    _print(
+        f'{datetime.datetime.now()}: {message.from_user.id}, {message.from_user.first_name}, '
+        f'{message.from_user.username}, "get_count"')
     bot.send_message(message.chat.id, f'Переглядаю кількість фільмів за жанрами...')
     with sqlite3.connect('rezka.db') as con:
         c, c_ = con.cursor(), con.cursor()
@@ -38,9 +50,33 @@ def command_handler(message: Message):
     bot.send_message(message.chat.id, f'Знайшов: \n{inf_c}. \n\nВсього фільмів - {c_.fetchall()[0][0]}.')
 
 
+@bot.message_handler(commands=['get_logs'])
+def command_handler(message: Message):
+    _print(
+        f'{datetime.datetime.now()}: {message.from_user.id}, {message.from_user.first_name}, '
+        f'{message.from_user.username}, "get_logs"')
+
+    file = open("logs/logs.txt", 'rb')
+    bot.send_message(message.chat.id, f'Надсилаю логи...')
+    bot.send_document(message.chat.id, file)
+
+
+@bot.message_handler(commands=['clear_logs'])
+def command_handler(message: Message):
+    with open("logs/logs.txt", "w") as f:
+        f.write(
+            f'{datetime.datetime.now()}: {message.from_user.id}, {message.from_user.first_name}, '
+            f'{message.from_user.username}, "clear_logs"')
+    file = open("logs/logs.txt", 'rb')
+    bot.send_message(message.chat.id, f'Очищую логи...')
+    bot.send_document(message.chat.id, file)
+
+
 @bot.message_handler(commands=['get_new'])
 def command_handler(message: Message):
-    print(f'{message.from_user.id}, {message.from_user.first_name}, {message.from_user.username}, get_new')
+    _print(
+        f'{datetime.datetime.now()}: {message.from_user.id}, {message.from_user.first_name}, '
+        f'{message.from_user.username}, "get_new"')
     bot.send_message(message.chat.id, f'Поповнення бази фільмів...')
     bot.send_message(message.chat.id, f'База поповнена: \n{sql(genre_="best", depth_=6)}')
 
@@ -61,7 +97,8 @@ def command_handler(message):
         bot.send_message(message.chat.id, f'Підбираю випадковий фільм жанру "{message.text}"...')
 
         try:
-            print('\nDatabase connected...')
+            _print('\nDatabase connected...')
+
             with sqlite3.connect('rezka.db') as con:
                 c = con.cursor()
                 c.execute(
@@ -77,8 +114,9 @@ def command_handler(message):
 
                 bot.send_message(message.chat.id, random_name)
 
-                print(
-                    f'{message.from_user.id}, {message.from_user.first_name}, {message.from_user.username}, "{r_f[3]}", "{r_f[0]}"')
+                _print(
+                    f'{datetime.datetime.now()}: {message.from_user.id}, {message.from_user.first_name}, '
+                    f'{message.from_user.username}, "{r_f[3]}", "{r_f[0]}"')
 
             else:
                 bot.send_sticker(message.chat.id,
@@ -86,17 +124,19 @@ def command_handler(message):
                 bot.send_message(message.chat.id, f'Жанр "{message.text}" відсутній у базі...')
 
         except Exception as e:
-            print(f'We have a problem: \n{e}')
+            _print(f'We have a problem: \n{e}')
 
         finally:
             con.close()
-            print('Connection closed...')
+            _print('Connection closed...\n')
 
     else:
         bot.send_sticker(message.chat.id,
                          "CAACAgIAAxkBAAEDGYRhawziXGhJxyhpEyjOy5-5_2O2sQACDgEAArSASiTg4WrIqh1AMCEE")
         bot.send_message(message.chat.id, f'"{message.text}" - невідома команда')
-        print(f'{message.from_user.id}, {message.from_user.first_name}, {message.from_user.username}, "{message.text}"')
+        _print(
+            f'{datetime.datetime.now()}: {message.from_user.id}, {message.from_user.first_name}, '
+            f'{message.from_user.username}, "{message.text}" - невідома команда')
 
 
 if __name__ == '__main__':
